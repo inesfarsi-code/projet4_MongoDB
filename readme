@@ -1,0 +1,119 @@
+# Migration de données médicales vers MongoDB avec Docker
+
+## Contexte
+
+Ce projet s’inscrit dans le cadre d’une mission de Data Engineer chez **DataSoluTech**.
+
+Un client fournit un dataset de données médicales au format CSV et rencontre des problèmes
+de performance et de scalabilité avec ses outils actuels.  
+L’objectif est de proposer une solution Big Data moderne, capable de :
+
+- gérer un volume croissant de données,
+- faciliter l’évolution du schéma,
+- automatiser l’ingestion des données.
+
+La solution retenue repose sur :
+
+- une base **MongoDB** (NoSQL orientée documents),
+- un **script Python** automatisant la migration,
+- une exécution **conteneurisée avec Docker**,
+- des contrôles d’intégrité avant et après import.
+
+---
+
+## Technologies utilisées
+
+- Python 3  
+- Pandas  
+- PyMongo  
+- MongoDB  
+- Docker & Docker Compose  
+
+---
+
+## Structure du projet
+
+```text
+project4-mongo/
+├── docker-compose.yml
+├── Dockerfile
+├── requirements.txt
+├── README.md
+├── data/
+│   └── healthcare_dataset.csv
+└── src/
+    └── migrate.py
+```
+data/healthcare_dataset.csv : fichier source
+
+src/migrate.py : script de migration automatisée
+
+requirements.txt : dépendances Python
+
+docker-compose.yml : orchestration des conteneurs
+
+Dockerfile : image du conteneur “migrator”
+
+## Modèle de données MongoDB
+
+Les données sont stockées dans la base medicaldb, collection admissions.
+
+Chaque ligne du CSV est transformée en un document MongoDB structuré comme suit :
+```json
+{
+  "patient": {
+    "name": "...",
+    "age": 30,
+    "gender": "...",
+    "blood_type": "..."
+  },
+  "medical": {
+    "condition": "...",
+    "medication": "...",
+    "test_results": "..."
+  },
+  "facility": {
+    "doctor": "...",
+    "hospital": "...",
+    "insurance_provider": "...",
+    "room_number": 123
+  },
+  "stay": {
+    "admission_date": "...",
+    "discharge_date": "...",
+    "admission_type": "..."
+  },
+  "billing_amount": 12345.67
+}
+```
+Ce modèle orienté document permet :
+
+une meilleure lisibilité métier,
+
+une évolution du schéma sans migration lourde,
+
+des requêtes efficaces sur des sous-structures.
+
+## Fonctionnement du script de migration
+
+Le script migrate.py exécute les étapes suivantes :
+
+Lecture du fichier CSV avec Pandas
+
+Suppression des doublons
+
+Connexion à MongoDB
+
+Nettoyage de la collection cible (script rejouable)
+
+Transformation de chaque ligne du CSV en document MongoDB
+
+Insertion des documents dans la collection
+
+Création d’index pour améliorer les performances
+
+Vérification finale du nombre de documents en base
+
+En fin d’exécution, le script garantit que :
+Nombre de lignes CSV = Nombre de documents MongoDB
+En cas d’incohérence, une erreur est levée.
