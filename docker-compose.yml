@@ -1,0 +1,23 @@
+services:
+  mongo:
+    image: mongo:7
+    container_name: mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: rootpass
+      MONGO_INITDB_DATABASE: medicaldb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  migrator:
+    build: .
+    depends_on:
+      - mongo
+    environment:
+      MONGO_URI: mongodb://root:rootpass@mongo:27017/admin
+
+volumes:
+  mongo_data:
