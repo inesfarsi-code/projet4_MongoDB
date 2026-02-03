@@ -1,3 +1,5 @@
+version: "3.9"
+
 services:
   mongo:
     image: mongo:7
@@ -7,17 +9,26 @@ services:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: rootpass
       MONGO_INITDB_DATABASE: medicaldb
-    ports:
-      - "27017:27017"
     volumes:
       - mongo_data:/data/db
+    networks:
+      - mongo_network
+    ports:
+      - "27017:27017"
 
   migrator:
     build: .
+    container_name: mongo-migrator
     depends_on:
       - mongo
     environment:
       MONGO_URI: mongodb://root:rootpass@mongo:27017/admin
+    networks:
+      - mongo_network
 
 volumes:
   mongo_data:
+
+networks:
+  mongo_network:
+    driver: bridge
